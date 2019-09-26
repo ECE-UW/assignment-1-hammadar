@@ -128,24 +128,28 @@ def calculateVertices(streets):
                                 type[tempindex] = "i"
                             if streets[i] not in vertStreets[tempindex] and street not in vertStreets[tempindex]:
                                 vertStreets[tempindex] = [streets[i], street]
+                            if lineCompare in streets[i].lines and line in street.lines:
+                                del vertices[tempindex]
+                                del type[tempindex]
+                                del vertStreets[tempindex]
 
-                        elif intersect not in vertices and lineCompare not in streets[i].lines and line not in street.lines: #if the intersect is not in the list, and the two line segments being compared aren't on two streets at the same time
+                        elif intersect not in vertices and (lineCompare not in streets[i].lines or line not in street.lines): #if the intersect is not in the list, and the two line segments being compared aren't on two streets at the same time
                             vertices.append(intersect)
                             type.append("i")
                             vertStreets.append([streets[i], street])
-                        if line.endpoint1 not in vertices and intersect != line.endpoint1:
+                        if line.endpoint1 not in vertices and intersect != line.endpoint1 and (lineCompare not in streets[i].lines or line not in street.lines):
                             vertices.append(line.endpoint1)
                             type.append("e")
                             vertStreets.append([streets[i]])
-                        if line.endpoint2 not in vertices and intersect != line.endpoint2:
+                        if line.endpoint2 not in vertices and intersect != line.endpoint2 and (lineCompare not in streets[i].lines or line not in street.lines):
                             vertices.append(line.endpoint2)
                             type.append("e")
                             vertStreets.append([streets[i]])
-                        if lineCompare.endpoint1 not in vertices and lineCompare.endpoint1 != intersect:
+                        if lineCompare.endpoint1 not in vertices and lineCompare.endpoint1 != intersect and (lineCompare not in streets[i].lines or line not in street.lines):
                             vertices.append(lineCompare.endpoint1)
                             type.append("e")
                             vertStreets.append([street])
-                        if (lineCompare.endpoint2) not in vertices and lineCompare.endpoint2 != intersect:
+                        if (lineCompare.endpoint2) not in vertices and lineCompare.endpoint2 != intersect and (lineCompare not in streets[i].lines or line not in street.lines):
                             vertices.append(lineCompare.endpoint2)
                             type.append("e")
                             vertStreets.append([street])
