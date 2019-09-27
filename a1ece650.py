@@ -41,7 +41,7 @@ def parseIntCoordinates(point):
 def checkFormat(userintemp):
     userin = userintemp.strip(" ")
     if userin[0] == "a" or userin[0] == "c":
-        pattern = "[ac]\s+\"[a-zA-Z\s]+\"\s+(\(-?[0-9]+,-?[0-9]+\)\s+){2,}\n*"
+        pattern = "[ac]\s+\"[a-zA-Z\s]+\"\s+(\(-?[0-9]+,-?[0-9]+\)\s*){2,}\n*"
         if re.match(pattern, userin) is not None:
             return True
     if userin[0] == "r":
@@ -123,6 +123,8 @@ def calculateVertices(streets):
                         continue
                     intersect = calculateIntersection(line, lineCompare) #calculate intersect of two lines
                     if intersect is not None: #append intersect and endpoints to the vertices list
+                        if intersect not in intercepts:
+                            intercepts.append(intersect)
                         if intersect in vertices: #if it's alreayd in the list, if it's listed as an endpoint type, change it to intersection, and adjust the streets list to reflect both streets
                             tempindex = vertices.index(intersect)
                             if type[tempindex] != "i":
@@ -138,7 +140,7 @@ def calculateVertices(streets):
                             vertices.append(intersect)
                             type.append("i")
                             vertStreets.append([streets[i], street])
-                            intercepts.append(intersect)
+
                         if line.endpoint1 not in vertices and intersect != line.endpoint1 and line.endpoint1 not in intercepts:
                             vertices.append(line.endpoint1)
                             type.append("e")
@@ -297,15 +299,15 @@ def produceGraph(streets):
     vertices = calculateVertices(streets)
     edges = calculateEdges(vertices)
 
-    print "V = { \n"
+    print "V = {"
 
     for key, value in vertices.iteritems():
-        print key,":",value.coordinate,"\n"
+        print "%d:\t(%.2f,%.2f)" % (key, value.coordinate[0], value.coordinate[1])
     print "}"
-    print "E = { \n"
+    print "E = { "
 
     for edge in edges:
-        print "<",edge[0],",",edge[1],">\n"
+        print "<%d,%d>" % (edge[0], edge[1])
     print "}"
 
 
