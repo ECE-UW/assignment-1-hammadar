@@ -343,7 +343,7 @@ class Line:
         if self.m is not None:
             ytemp = self.m * p[0] + self.intercept
 
-            if ytemp == p[1] and ytemp in self.yrange:
+            if ytemp == p[1] and ytemp in self.yrange and p[0] in self.xrange:
                 return True
         else:
             if p[0] == self.x1 and p[1] in self.yrange:
