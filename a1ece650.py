@@ -352,7 +352,7 @@ class Line:
         return False
 
     def __eq__(self,l):
-        if l.m == self.m and (l.endpoint1 == self.endpoint1 or l.endpoint1 == self.endpoint2 or l.endpoint2 == self.endpoint2 or l.endpoint2 == self.endpoint1):
+        if l.m == self.m and ((l.endpoint1[0] in self.xrange and l.endpoint1[1] in self.yrange and np.where(self.xrange == l.endpoint1[0]) == np.where(self.yrange == l.endpoint1[1])) or (l.endpoint2[0] in self.xrange and l.endpoint2[1] in self.yrange and np.where(self.xrange == l.endpoint2[0]) == np.where(self.yrange == l.endpoint2[1]))): #== self.endpoint1 or l.endpoint1 == self.endpoint2 or l.endpoint2 == self.endpoint2 or l.endpoint2 == self.endpoint1):#modify here... account for endpoints in x range or y range
             return True
         return False
 
