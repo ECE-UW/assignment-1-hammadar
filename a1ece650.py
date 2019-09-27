@@ -30,7 +30,8 @@ def parseStreetName(userintemp):
 
 def parseCoordinates(userintemp):
     userin = userintemp.strip(" ")
-    coordinates = re.findall(r'(\(-?[0-9]+,-?[0-9]+\))', userin)
+    coordinates = re.findall(r'(\(\s*-?[0-9]+\s*,\s*-?[0-9]+\s*\))', userin)
+    coordinates = [coordinate.replace(" ", "") for coordinate in coordinates]
     return coordinates
 
 def parseIntCoordinates(point):
@@ -41,7 +42,7 @@ def parseIntCoordinates(point):
 def checkFormat(userintemp):
     userin = userintemp.strip(" ")
     if userin[0] == "a" or userin[0] == "c":
-        pattern = "[ac]\s+\"[a-zA-Z\s]+\"\s+(\(-?[0-9]+,-?[0-9]+\)\s*){2,}\n*"
+        pattern = "[ac]\s+\"[a-zA-Z\s]+\"\s+(\(\s*-?[0-9]+\s*,\s*-?[0-9]+\s*\)\s*){2,}\n*"
         if re.match(pattern, userin) is not None:
             return True
     if userin[0] == "r":
