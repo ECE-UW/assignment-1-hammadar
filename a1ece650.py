@@ -439,16 +439,16 @@ def main():
         vertices = calculateVertices(streets)
         edges = calculateEdges(vertices)
 
-        sys.stdout.write("V = {\n")
+        sys.stderr.write("V = {\n")
 
         for key, value in vertices.iteritems():
-            sys.stdout.write("%d:\t(%.2f,%.2f)\n" % (key, value.coordinate[0], value.coordinate[1]))
-        sys.stdout.write("}\n")
-        sys.stdout.write("E = {\n")
+            sys.stderr.write("%d:\t(%.2f,%.2f)\n" % (key, value.coordinate[0], value.coordinate[1]))
+        sys.stderr.write("}\n")
+        sys.stderr.write("E = {\n")
 
         for edge in edges:
-            sys.stdout.write("<%d,%d>\n" % (edge[0], edge[1]))
-        sys.stdout.write("}\n")
+            sys.stderr.write("<%d,%d>\n" % (edge[0], edge[1]))
+        sys.stderr.write("}\n")
     while True:
         line = sys.stdin.readline()
         if line == '':
