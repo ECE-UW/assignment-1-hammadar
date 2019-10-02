@@ -2,10 +2,12 @@ import sys
 import re
 import numpy as np
 import copy
+from decimal import *
 
 # YOUR CODE GOES HERE
 
 streets = []
+getcontext().prec = 2
 
 
 def parseCommand(userintemp):
@@ -87,10 +89,10 @@ def calculateVertices(streets):
 
     for i in range(length):
 
-        if i != 0:
-            streetsToSearch = streets[0:i] + streets[i+1:length]
-        else:
-            streetsToSearch = streets[i+1:length]
+       # if i != 0:
+       #     streetsToSearch = streets[0:i] + streets[i+1:length]
+       # else:'''
+        streetsToSearch = streets[i+1:length]
 
 
         for line in streets[i].lines:
@@ -122,6 +124,43 @@ def calculateVertices(streets):
                                 del type[tempindex]
                                 del vertStreets[tempindex]
                         continue
+
+                    elif line.contains(lineCompare):
+                        if lineCompare.endpoint1 not in intercepts:
+                            intercepts.append(lineCompare.endpoint1)
+                            if lineCompare.endpoint1 in vertices:
+                                tempindex = vertices.index(lineCompare.endpoint1)
+                                if type[tempindex] != "i":
+                                    type[tempindex] = "i"
+                                if streets[i] not in vertStreets[tempindex] and street not in vertStreets[tempindex]:
+                                    vertStreets[tempindex] = [streets[i], street]
+                            else:
+                                vertices.append(lineCompare.endpoint1)
+                                type.append("i")
+                                vertStreets.append([streets[i], street])
+
+                            if lineCompare.endpoint2 in vertices:
+                                tempindex = vertices.index(lineCompare.endpoint2)
+                                if type[tempindex] != "i":
+                                    type[tempindex] = "i"
+                                if streets[i] not in vertStreets[tempindex] and street not in vertStreets[tempindex]:
+                                    vertStreets[tempindex] = [streets[i], street]
+                            else:
+                                vertices.append(lineCompare.endpoint2)
+                                type.append("i")
+                                vertStreets.append([streets[i], street])
+
+                            if line.endpoint1 not in vertices and line.endpoint1 not in intercepts:
+                                vertices.append(line.endpoint1)
+                                type.append("e")
+                                vertStreets.append(streets[i])
+
+                            if line.endpoint2 not in vertices and line.endpoint1 not in intercepts:
+                                vertices.append(line.endpoint2)
+                                type.append("e")
+                                vertStreets.append(streets[i])
+                        continue
+
                     intersect = calculateIntersection(line, lineCompare) #calculate intersect of two lines
                     if intersect is not None: #append intersect and endpoints to the vertices list
                         if intersect not in intercepts:
@@ -265,7 +304,7 @@ def checkPath(vertex1, vertex2, vertex1Check, vertex2Check, vertices, streetToSe
 
     return True
 
-def vertexCheck(vertex, street):
+def vertexCheck(vertex, street): #checks which line segment of a street the vertex is on, and whether it's an endpoint on that segment
     lineseg = -1
     endpoint = -1
 
@@ -300,16 +339,16 @@ def produceGraph(streets):
     vertices = calculateVertices(streets)
     edges = calculateEdges(vertices)
 
-    print "V = {"
+    sys.stdout.write("V = {\n")
 
     for key, value in vertices.iteritems():
-        print "%d:\t(%.2f,%.2f)" % (key, value.coordinate[0], value.coordinate[1])
-    print "}"
-    print "E = { "
+        sys.stdout.write("%d:\t(%.2f,%.2f)\n" % (key, value.coordinate[0], value.coordinate[1]))
+    sys.stdout.write("}\n")
+    sys.stdout.write("E = {\n")
 
     for edge in edges:
-        print "<%d,%d>" % (edge[0], edge[1])
-    print "}"
+        sys.stdout.write("<%d,%d>\n" % (edge[0], edge[1]))
+    sys.stdout.write("}\n")
 
 
 
@@ -342,18 +381,30 @@ class Line:
     def checkPointOnLine(self,p):
         if self.m is not None:
             ytemp = self.m * p[0] + self.intercept
+            ytemp = Decimal(str(ytemp))
+            py = Decimal(str(p[1]))
 
-            if ytemp == p[1] and ytemp in self.yrange and p[0] in self.xrange:
-                return True
+            if Decimal(ytemp).compare(py) == Decimal('0'): #this isn't working for some reason
+                if p[1] in self.yrange:
+                    if p[0] in self.xrange:
+                        return True
         else:
             if p[0] == self.x1 and p[1] in self.yrange:
                 return True
 
+
         return False
 
     def __eq__(self,l):
-        if l.m == self.m and ((l.endpoint1[0] in self.xrange and l.endpoint1[1] in self.yrange and np.where(self.xrange == l.endpoint1[0]) == np.where(self.yrange == l.endpoint1[1])) or (l.endpoint2[0] in self.xrange and l.endpoint2[1] in self.yrange and np.where(self.xrange == l.endpoint2[0]) == np.where(self.yrange == l.endpoint2[1]))): #== self.endpoint1 or l.endpoint1 == self.endpoint2 or l.endpoint2 == self.endpoint2 or l.endpoint2 == self.endpoint1):#modify here... account for endpoints in x range or y range
+        if l.m == self.m and ((l.endpoint1[0] in self.xrange and l.endpoint1[1] in self.yrange and np.where(self.xrange == l.endpoint1[0]) == np.where(self.yrange == l.endpoint1[1])) and (l.endpoint2[0] in self.xrange and l.endpoint2[1] in self.yrange and np.where(self.xrange == l.endpoint2[0]) == np.where(self.yrange == l.endpoint2[1]))): #== self.endpoint1 or l.endpoint1 == self.endpoint2 or l.endpoint2 == self.endpoint2 or l.endpoint2 == self.endpoint1):#modify here... account for endpoints in x range or y range
             return True
+        return False
+
+    def contains(self,l):
+        if l.m == self.m:
+            if self.checkPointOnLine(l.endpoint1) or self.checkPointOnLine(l.endpoint2):
+                return True
+
         return False
 
 class Street:
@@ -369,6 +420,11 @@ class Street:
 
     def changeLine(self, lineSeg, newLine):
         self.lines[lineSeg] = newLine
+
+    def __eq__(self, otherStreet):
+        if self.name == otherStreet.name and self.lines == otherStreet.lines:
+            return True
+        return False
 
     
 
@@ -401,6 +457,9 @@ def main():
                 streetname = parseStreetName(line).capitalize()
                 coordinates = parseCoordinates(line)
                 street = produceStreet(streetname, coordinates)
+                if street in streets:
+                    sys.stderr.write("Error: that street is already present. Please re-enter your command\n")
+                    continue
                 streets.append(street)
             elif command == "change":
                 streetname = parseStreetName(line).capitalize()
@@ -412,7 +471,7 @@ def main():
                         presence = True
                         streets[i] = street
                 if not presence:
-                    print("Error: that street has not yet been added. Please re-enter your command")
+                    sys.stderr.write("Error: that street has not yet been added. Please re-enter your command\n")
                     continue
             elif command == "remove":
                 streetname = parseStreetName(line).capitalize()
@@ -423,13 +482,13 @@ def main():
                 if y > -1:
                     del streets[y]
                 else:
-                    print("Error: that street has not yet been added. Please re-enter your command")
+                    sys.stderr.write("Error: that street has not yet been added. Please re-enter your command\n")
                     continue
             else:
                 produceGraph(streets)
 
         else:
-            print "Error: incorrect format. Please try again"
+            sys.stderr.write("Error: incorrect format. Please try again\n")
             continue
 
 
