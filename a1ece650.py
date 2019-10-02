@@ -496,7 +496,7 @@ def main():
 
 
 
-    print 'Finished reading input'
+    #print 'Finished reading input'
     # return exit code 0 on successful termination
     sys.exit(0)
 
