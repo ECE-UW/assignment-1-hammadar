@@ -335,20 +335,7 @@ def produceStreet(streetname, coordinates):
 
     return street
 
-def produceGraph(streets):
-    vertices = calculateVertices(streets)
-    edges = calculateEdges(vertices)
 
-    sys.stdout.write("V = {\n")
-
-    for key, value in vertices.iteritems():
-        sys.stdout.write("%d:\t(%.2f,%.2f)\n" % (key, value.coordinate[0], value.coordinate[1]))
-    sys.stdout.write("}\n")
-    sys.stdout.write("E = {\n")
-
-    for edge in edges:
-        sys.stdout.write("<%d,%d>\n" % (edge[0], edge[1]))
-    sys.stdout.write("}\n")
 
 
 
@@ -447,6 +434,21 @@ def main():
     ### by the assignment
 
     streets = []
+
+    def produceGraph(streets):
+        vertices = calculateVertices(streets)
+        edges = calculateEdges(vertices)
+
+        sys.stdout.write("V = {\n")
+
+        for key, value in vertices.iteritems():
+            sys.stdout.write("%d:\t(%.2f,%.2f)\n" % (key, value.coordinate[0], value.coordinate[1]))
+        sys.stdout.write("}\n")
+        sys.stdout.write("E = {\n")
+
+        for edge in edges:
+            sys.stdout.write("<%d,%d>\n" % (edge[0], edge[1]))
+        sys.stdout.write("}\n")
     while True:
         line = sys.stdin.readline()
         if line == '':
