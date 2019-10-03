@@ -153,12 +153,12 @@ def calculateVertices(streets):
                             if line.endpoint1 not in vertices and line.endpoint1 not in intercepts:
                                 vertices.append(line.endpoint1)
                                 type.append("e")
-                                vertStreets.append(streets[i])
+                                vertStreets.append([streets[i]])
 
                             if line.endpoint2 not in vertices and line.endpoint1 not in intercepts:
                                 vertices.append(line.endpoint2)
                                 type.append("e")
-                                vertStreets.append(streets[i])
+                                vertStreets.append([streets[i]])
                         continue
 
                     intersect = calculateIntersection(line, lineCompare) #calculate intersect of two lines
@@ -258,13 +258,13 @@ def checkPath(vertex1, vertex2, vertex1Check, vertex2Check, vertices, streetToSe
         if street.lines[start].endpoint2 == vertex1.coordinate:
             start += 1
         elif street.lines[start].endpoint1 != vertex1.coordinate and street.lines[start].endpoint2 != vertex1.coordinate:
-            newLine = Line((int(vertex1.coordinate[0]), int(vertex1.coordinate[1])), street.lines[start].endpoint2)
+            newLine = Line((vertex1.coordinate[0], vertex1.coordinate[1]), street.lines[start].endpoint2)
             street.changeLine(start, newLine)
 
         if vertex2.coordinate == street.lines[end-1].endpoint1:
             end -= 1
         elif vertex2.coordinate != street.lines[end-1].endpoint2 and vertex2.coordinate != street.lines[end-1].endpoint1:
-            newLine = Line(street.lines[end-1].endpoint1,(int(vertex2.coordinate[0]), int(vertex2.coordinate[1])))
+            newLine = Line(street.lines[end-1].endpoint1,(vertex2.coordinate[0], vertex2.coordinate[1]))
             street.changeLine(end-1, newLine)
 
     elif vertex2Check[0] < vertex1Check[0]:
@@ -274,20 +274,20 @@ def checkPath(vertex1, vertex2, vertex1Check, vertex2Check, vertices, streetToSe
         if street.lines[start].endpoint2 == vertex2.coordinate:
             start += 1
         elif street.lines[start].endpoint1 != vertex2.coordinate and street.lines[start].endpoint2 != vertex2.coordinate:
-            newLine = Line((int(vertex2.coordinate[0]), int(vertex2.coordinate[1])), street.lines[start].endpoint2)
+            newLine = Line((vertex2.coordinate[0], vertex2.coordinate[1]), street.lines[start].endpoint2)
             street.changeLine(start, newLine)
 
         if vertex1.coordinate == street.lines[end - 1].endpoint1:
             end -= 1
         elif vertex1.coordinate != street.lines[end-1].endpoint2 and vertex1.coordinate != street.lines[end - 1].endpoint1:
-            newLine = Line(street.lines[end-1].endpoint1, (int(vertex1.coordinate[0]), int(vertex1.coordinate[1])))
+            newLine = Line(street.lines[end-1].endpoint1, (vertex1.coordinate[0], vertex1.coordinate[1]))
             street.changeLine(end - 1, newLine)
     else:
         start = vertex2Check[0]
         end = vertex2Check[0]
 
     if start == end: #already checked that at least one is an intersection, so the other must be an endpoint. Make a new line segment between them, and then see if any other vertices pop up on that
-        line = Line((int(vertex1.coordinate[0]),int(vertex1.coordinate[1])),(int(vertex2.coordinate[0]),int(vertex2.coordinate[1])))
+        line = Line((vertex1.coordinate[0],vertex1.coordinate[1]),(vertex2.coordinate[0],vertex2.coordinate[1]))
         for vertex in vertices:
             if not vertex[1].equals(vertex1) and not vertex[1].equals(vertex2):
                 if line.checkPointOnLine(vertex[1].coordinate):
@@ -366,7 +366,7 @@ class Line:
             self.intercept = round(float(self.y1 - self.m*self.x1),2)
 
     def checkPointOnLine(self,p):
-        if self.m is not None:
+        '''if self.m is not None:
             ytemp = self.m * p[0] + self.intercept
             ytemp = Decimal(str(ytemp))
             py = Decimal(str(p[1]))
@@ -377,10 +377,24 @@ class Line:
                         return True
         else:
             if p[0] == self.x1 and p[1] in self.yrange:
-                return True
+                return True'''
+        crossproduct = round((p[1] -self.endpoint1[1]) * (self.endpoint2[0] - self.endpoint1[0]) - (p[0] - self.endpoint1[0]) * (self.endpoint2[1] - self.endpoint1[1]), 1)
+        crossproduct = Decimal(str(crossproduct))
+        dotproduct = round((p[0] - self.endpoint1[0]) * (self.endpoint2[0] - self.endpoint1[0]) + (p[1] - self.endpoint1[1]) * (self.endpoint2[1] - self.endpoint1[1]), 1)
+        dotproduct = Decimal(str(dotproduct))
+        squaredlength = round((self.endpoint2[0] - self.endpoint1[0]) * (self.endpoint2[0] - self.endpoint1[0]) + (self.endpoint2[1] - self.endpoint1[1]) * (self.endpoint2[1] - self.endpoint1[1]),1)
+        squaredlength = Decimal(str(squaredlength))
 
-
+        if Decimal(crossproduct).compare(Decimal("0")) == Decimal("0"):
+            if dotproduct.number_class() == "+Normal" or dotproduct.number_class() == "+Zero" or dotproduct.number_class() == "-Zero":
+                if Decimal(dotproduct).compare(squaredlength) == Decimal('-1') or Decimal(dotproduct).compare(squaredlength) == Decimal('0') :
+                    return True
         return False
+
+
+
+
+
 
     def __eq__(self,l):
         if l.m == self.m and ((l.endpoint1[0] in self.xrange and l.endpoint1[1] in self.yrange and np.where(self.xrange == l.endpoint1[0]) == np.where(self.yrange == l.endpoint1[1])) and (l.endpoint2[0] in self.xrange and l.endpoint2[1] in self.yrange and np.where(self.xrange == l.endpoint2[0]) == np.where(self.yrange == l.endpoint2[1]))): #== self.endpoint1 or l.endpoint1 == self.endpoint2 or l.endpoint2 == self.endpoint2 or l.endpoint2 == self.endpoint1):#modify here... account for endpoints in x range or y range
@@ -449,6 +463,7 @@ def main():
         for edge in edges:
             sys.stderr.write("<%d,%d>\n" % (edge[0], edge[1]))
         sys.stderr.write("}\n")
+
     while True:
         line = sys.stdin.readline()
         if line == '':
